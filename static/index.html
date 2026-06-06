@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>MeetSnap AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #07080a;
+      --surface: #0e1015;
+      --surface2: #141720;
+      --border: #1e2330;
+      --text: #e8eaf0;
+      --muted: #6b7285;
+      --accent: #00e5a0;
+      --blue: #4d94ff;
+      --warn: #f5c542;
+      --red: #ff4757;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 20px
+    }
+
+    /* HEADER */
+    .header {
+      text-align: center;
+      margin-bottom: 36px
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px
+    }
+
+    .logo span {
+      color: var(--accent)
+    }
+
+    .tagline {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 6px
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      background: rgba(0, 229, 160, 0.08);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-top: 10px
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.4
+      }
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px
+    }
+
+    .card-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700
+    }
+
+    .card-tag {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 20px
+    }
+
+    .card-body {
+      padding: 20px
+    }
+
+    /* INPUT */
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px
+    }
+
+    input[type=text],
+    textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border 0.15s;
+      width: 100%;
+    }
+
+    input[type=text]:focus,
+    textarea:focus {
+      border-color: rgba(0, 229, 160, 0.4)
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+      line-height: 1.6
+    }
+
+    /* BUTTONS */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s
+    }
+
+    .btn:hover {
+      border-color: var(--muted)
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent)
+    }
+
+    .btn-primary:hover {
+      background: #00cc8e
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed
+    }
+
+    .btn-sm {
+      padding: 7px 14px;
+      font-size: 12px
+    }
+
+    /* RESULTS */
+    .result-section {
+      display: none
+    }
+
+    .result-section.visible {
+      display: block
+    }
+
+
+    .summary-box {
+      background: rgba(0, 229, 160, 0.05);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      line-height: 1.7;
+      font-size: 13.5px
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px
+    }
+
+    .mini-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px
+    }
+
+    .mini-title {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-weight: 500
+    }
+
+    .item {
+      font-size: 13px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px
+    }
+
+    .item:last-child {
+      border-bottom: none;
+      padding-bottom: 0
+    }
+
+    .item-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px
+    }
+
+    .action-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 8px
+    }
+
+    .action-item:last-child {
+      margin-bottom: 0
+    }
+
+    .action-task {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 4px
+    }
+
+    .action-meta {
+      font-size: 11.5px;
+      color: var(--muted);
+      display: flex;
+      gap: 12px
+    }
+
+    .action-owner {
+      color: var(--blue)
+    }
+
+    .action-due {
+      color: var(--warn)
+    }
+
+    .sentiment {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 500
+    }
+
+    .sent-positive {
+      background: rgba(0, 229, 160, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(0, 229, 160, 0.2)
+    }
+
+    .sent-neutral {
+      background: rgba(107, 114, 133, 0.1);
+      color: var(--muted);
+      border: 1px solid rgba(107, 114, 133, 0.2)
+    }
+
+    .sent-mixed {
+      background: rgba(245, 197, 66, 0.1);
+      color: var(--warn);
+      border: 1px solid rgba(245, 197, 66, 0.2)
+    }
+
+    .sent-negative {
+      background: rgba(255, 71, 87, 0.1);
+      color: var(--red);
+      border: 1px solid rgba(255, 71, 87, 0.2)
+    }
+
+    /* CHAT */
+    .chat-messages {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 120px;
+      max-height: 280px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      padding: 4px 0
+    }
+
+    .msg {
+      max-width: 88%
+    }
+
+    .msg.user {
+      align-self: flex-end
+    }
+
+    .msg.ai {
+      align-self: flex-start
+    }
+
+    .bubble {
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.6
+    }
+
+    .user .bubble {
+      background: rgba(0, 229, 160, 0.1);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+      border-bottom-right-radius: 3px
+    }
+
+    .ai .bubble {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 3px
+    }
+
+    .typing span {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: blink 1s infinite;
+      margin: 0 1px
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: 0.2s
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: 0.4s
+    }
+
+    @keyframes blink {
+
+      0%,
+      60%,
+      100% {
+        opacity: 0.2
+      }
+
+      30% {
+        opacity: 1
+      }
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px
+    }
+
+    .chat-input-row input {
+      flex: 1
+    }
+
+    /* LOADING */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 13px
+    }
+
+    .loading.visible {
+      display: block
+    }
+
+    .spin {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+      margin-right: 6px
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 11.5px;
+      color: var(--muted)
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="logo">Meet<span>Snap</span> AI</div>
+      <div class="tagline">Paste a meeting transcript → get instant AI intelligence</div>
+      <div class="badge"><span class="dot"></span>Powered by Azure OpenAI · GPT-4o</div>
+    </div>
+
+    <div style="display:flex;gap:24px;justify-content:center;margin:16px 0">
+      <div style="text-align:center">
+        <div style="font-size:24px;font-weight:800;color:#00e5a0">10s</div>
+        <div style="font-size:11px;color:#6b7285">Analysis time</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:24px;font-weight:800;color:#4d94ff">100%</div>
+        <div style="font-size:11px;color:#6b7285">Tasks captured</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:24px;font-weight:800;color:#f5c542">GPT-4o</div>
+        <div style="font-size:11px;color:#6b7285">Powered by</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: INPUT -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">📋 Paste your transcript</div>
+        <span class="card-tag">GitHub Models · GPT-4o</span>
+      </div>
+      <div class="card-body">
+        <div class="input-row">
+          <input type="text" id="meeting-title" placeholder="Meeting title (e.g. Sprint Planning)"
+            value="Sprint Planning" />
+        </div>
+        <!-- TABS -->
+<div style="display:flex;gap:8px;margin-bottom:12px">
+  <button class="btn btn-primary btn-sm" id="tab1-btn" onclick="switchTab(1)">
+    📋 Meeting 1
+  </button>
+  <button class="btn btn-sm" id="tab2-btn" onclick="switchTab(2)">
+    📋 Meeting 2
+  </button>
+  <button class="btn btn-sm" id="compare-btn" onclick="compareTranscripts()" style="margin-left:auto;background:#f5c542;color:#000;border-color:#f5c542">
+    ⚡ Compare Both
+  </button>
+</div>
+        <textarea id="transcript" placeholder="Paste your meeting transcript here...
+Example:
+Alice: Let's ship the login page by Friday.
+Bob: I can handle the backend API.
+Carol: I'll do the UI design, need mockups by Wednesday.
+Alice: Any blockers? Bob: Still waiting on DB credentials from DevOps."></textarea>
+        <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+          <button class="btn btn-primary" id="analyze-btn" onclick="analyze()">⚡ Analyze with AI</button>
+          <button class="btn btn-sm" onclick="loadDemo()">Load demo transcript</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading" id="loading">
+      <span class="spin">◌</span> AI is analyzing your meeting...
+    </div>
+
+    <!-- STEP 2: RESULTS -->
+    <div class="result-section" id="results">
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">✨ AI Summary</div>
+          <div id="sentiment-badge"></div>
+        </div>
+        <div class="card-body">
+          <div class="summary-box" id="summary-text"></div>
+
+          <div class="grid2">
+            <div class="mini-card">
+              <div class="mini-title">Decisions made</div>
+              <div id="decisions-list"></div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-title">Blockers raised</div>
+              <div id="blockers-list"></div>
+            </div>
+          </div>
+
+          <div class="mini-title" style="margin-bottom:10px">Action items</div>
+          <div id="actions-list"></div>
+          <div style="margin-top:16px;text-align:right">
+            <button class="btn btn-primary btn-sm" onclick="exportResults()">
+              📥 Export Summary
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: CHAT -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">💬 Ask about this meeting</div>
+          <span class="card-tag">GPT-4o · Context Aware</span>
+        </div>
+        <div class="card-body">
+          <div class="chat-messages" id="chat-messages">
+            <div class="msg ai">
+              <div class="bubble">Meeting analyzed! Ask me anything — who owns what, what was decided, any blockers,
+                etc.</div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" id="chat-input" placeholder="What did we decide? Who owns the backend?"
+              onkeydown="if(event.key==='Enter')sendChat()" />
+            <button class="btn btn-primary" onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer">MeetSnap AI · Built for Microsoft Build AI Hackathon 2026 · GitHub Models GPT-4o + FastAPI</div>
+  </div>
+
+  <script>
+    const API = '';  // empty = same origin. Change to 'http://localhost:8000' if running frontend separately
+
+    const DEMO = `Alice: Alright everyone, let's start. Today's sprint planning for v2.4.
+Bob: I've finished the auth module. Ready to merge.
+Alice: Great. Let's decide on the release date. Can we ship by next Friday?
+Carol: UI should be ready. I just need final copy from marketing by Wednesday.
+Bob: Backend is good to go. Only blocker is the database migration script — DevOps hasn't approved it yet.
+Alice: Okay, I'll ping the DevOps team today. Carol, you own the UI delivery. Bob, please write up the migration plan and send to DevOps by EOD.
+Carol: Will do. Also, we agreed last week to drop the analytics tab from this release, right?
+Alice: Yes, analytics moves to v2.5. That's a firm decision.
+Bob: Noted. I'll update the roadmap doc.
+Alice: Perfect. Let's wrap. Bob owns migration plan, Carol owns UI, I'm unblocking DevOps.`;
+
+    function loadDemo() {
+      document.getElementById('transcript').value = DEMO;
+      document.getElementById('meeting-title').value = 'Sprint Planning v2.4';
+    }
+
+    async function analyze() {
+      const title = document.getElementById('meeting-title').value.trim();
+      const transcript = document.getElementById('transcript').value.trim();
+      if (!transcript) { alert('Please paste a transcript first'); return; }
+
+      document.getElementById('analyze-btn').disabled = true;
+      document.getElementById('loading').classList.add('visible');
+      document.getElementById('results').classList.remove('visible');
+
+      try {
+        const res = await fetch(`${API}/api/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, transcript })
+        });
+        const data = await res.json();
+        renderResults(data);
+        document.getElementById('results').classList.add('visible');
+
+        // Reset chat
+        document.getElementById('chat-messages').innerHTML =
+          '<div class="msg ai"><div class="bubble">Meeting analyzed! Ask me anything — who owns what, what was decided, any blockers, etc.</div></div>';
+
+      } catch (e) {
+        alert('Error: ' + e.message + '\n\nMake sure the backend is running on localhost:8000');
+      } finally {
+        document.getElementById('analyze-btn').disabled = false;
+        document.getElementById('loading').classList.remove('visible');
+      }
+    }
+
+    function renderResults(d) {
+      // Summary
+      document.getElementById('summary-text').textContent = d.summary || 'No summary available';
+
+      // Sentiment badge
+      const s = (d.sentiment || 'neutral').toLowerCase();
+      const sentMap = { positive: 'sent-positive ✅', neutral: 'sent-neutral ○', mixed: 'sent-mixed ⚡', negative: 'sent-negative ⚠' };
+      const [cls, icon] = (sentMap[s] || 'sent-neutral ○').split(' ');
+      document.getElementById('sentiment-badge').innerHTML =
+        `<span class="sentiment ${cls}">${icon} ${s.charAt(0).toUpperCase() + s.slice(1)} sentiment</span>`;
+
+      // Decisions
+      const dl = document.getElementById('decisions-list');
+      const decisions = d.decisions || [];
+      dl.innerHTML = decisions.length
+        ? decisions.map(dec => `<div class="item"><span class="item-dot" style="background:var(--accent)"></span>${dec}</div>`).join('')
+        : '<div class="item" style="color:var(--muted)">None recorded</div>';
+
+      // Blockers
+      const bl = document.getElementById('blockers-list');
+      const blockers = d.blockers || [];
+      bl.innerHTML = blockers.length
+        ? blockers.map(b => `<div class="item"><span class="item-dot" style="background:var(--red)"></span>${b}</div>`).join('')
+        : '<div class="item" style="color:var(--muted)">No blockers 🎉</div>';
+
+      // Action items
+      const al = document.getElementById('actions-list');
+      const actions = d.action_items || [];
+      al.innerHTML = actions.length
+        ? actions.map(a => `
+        <div class="action-item">
+          <div class="action-task">${a.task}</div>
+          <div class="action-meta">
+            <span class="action-owner">👤 ${a.owner}</span>
+            <span class="action-due">🗓 ${a.due}</span>
+          </div>
+        </div>`).join('')
+        : '<div style="color:var(--muted);font-size:13px">No action items found</div>';
+    }
+
+    async function sendChat() {
+      const input = document.getElementById('chat-input');
+      const q = input.value.trim();
+      if (!q) return;
+
+      const container = document.getElementById('chat-messages');
+      addMsg(container, 'user', q);
+      input.value = '';
+
+      const typing = document.createElement('div');
+      typing.className = 'msg ai'; typing.id = 'typing';
+      typing.innerHTML = '<div class="bubble typing"><span></span><span></span><span></span></div>';
+      container.appendChild(typing);
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        const res = await fetch(`${API}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: q })
+        });
+        const data = await res.json();
+        document.getElementById('typing')?.remove();
+        addMsg(container, 'ai', data.answer);
+      } catch (e) {
+        document.getElementById('typing')?.remove();
+        addMsg(container, 'ai', 'Error reaching the server. Make sure the backend is running.');
+      }
+    }
+
+    function addMsg(container, role, text) {
+      const el = document.createElement('div');
+      el.className = 'msg ' + role;
+      el.innerHTML = `<div class="bubble">${text}</div>`;
+      container.appendChild(el);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function exportResults() {
+      const summary = document.getElementById('summary-text').textContent;
+      const actions = document.getElementById('actions-list').textContent;
+      const decisions = document.getElementById('decisions-list').textContent;
+
+      const text = `MEETSNAP AI REPORT
+==================
+
+SUMMARY:
+${summary}
+
+DECISIONS:
+${decisions}
+
+ACTION ITEMS:
+${actions}
+
+Generated by MeetSnap AI - Microsoft Build AI Hackathon 2026`;
+
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'meeting-summary.txt';
+      a.click();
+    }
+
+    // 2 transcripts store karo
+let transcripts = {
+  1: {title: "", text: ""},
+  2: {title: "", text: ""}
+};
+let activeTab = 1;
+
+function switchTab(num) {
+  // Pehle current tab ka data save karo
+  transcripts[activeTab].title = document.getElementById('meeting-title').value;
+  transcripts[activeTab].text = document.getElementById('transcript').value;
+
+  // Tab switch karo
+  activeTab = num;
+
+  // Naye tab ka data load karo
+  document.getElementById('meeting-title').value = transcripts[num].title;
+  document.getElementById('transcript').value = transcripts[num].text;
+
+  // Button styles update karo
+  document.getElementById('tab1-btn').className = num === 1 ? 'btn btn-primary btn-sm' : 'btn btn-sm';
+  document.getElementById('tab2-btn').className = num === 2 ? 'btn btn-primary btn-sm' : 'btn btn-sm';
+}
+
+async function compareTranscripts() {
+  // Pehle current tab save karo
+  transcripts[activeTab].title = document.getElementById('meeting-title').value;
+  transcripts[activeTab].text = document.getElementById('transcript').value;
+
+  // Dono hain?
+  if (!transcripts[1].text || !transcripts[2].text) {
+    alert('Pehle dono meetings ka transcript paste karo!');
+    return;
+  }
+
+  document.getElementById('analyze-btn').disabled = true;
+  document.getElementById('loading').classList.add('visible');
+  document.getElementById('results').classList.remove('visible');
+
+  try {
+    // Dono analyze karo
+    const [res1, res2] = await Promise.all([
+      fetch('/api/analyze', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          title: transcripts[1].title || 'Meeting 1',
+          transcript: transcripts[1].text
+        })
+      }).then(r => r.json()),
+
+      fetch('/api/analyze', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          title: transcripts[2].title || 'Meeting 2',
+          transcript: transcripts[2].text
+        })
+      }).then(r => r.json())
+    ]);
+
+    // Compare result dikhao
+    renderCompare(res1, res2);
+    document.getElementById('results').classList.add('visible');
+
+  } catch(e) {
+    alert('Error: ' + e.message);
+  } finally {
+    document.getElementById('analyze-btn').disabled = false;
+    document.getElementById('loading').classList.remove('visible');
+  }
+}
+
+function renderCompare(r1, r2) {
+  // Summary
+  document.getElementById('summary-text').innerHTML =
+    `<strong style="color:#00e5a0">Meeting 1:</strong> ${r1.summary}<br><br>
+     <strong style="color:#4d94ff">Meeting 2:</strong> ${r2.summary}`;
+
+  // Sentiment
+  const s1 = r1.sentiment || 'neutral';
+  const s2 = r2.sentiment || 'neutral';
+  document.getElementById('sentiment-badge').innerHTML =
+    `<span class="sentiment sent-${s1}">M1: ${s1}</span>
+     <span class="sentiment sent-${s2}" style="margin-left:6px">M2: ${s2}</span>`;
+
+  // Decisions — dono dikhao
+  const dl = document.getElementById('decisions-list');
+  const d1 = (r1.decisions || []).map(d =>
+    `<div class="item"><span class="item-dot" style="background:#00e5a0"></span><span style="color:#00e5a0">[M1]</span> ${d}</div>`
+  ).join('');
+  const d2 = (r2.decisions || []).map(d =>
+    `<div class="item"><span class="item-dot" style="background:#4d94ff"></span><span style="color:#4d94ff">[M2]</span> ${d}</div>`
+  ).join('');
+  dl.innerHTML = (d1 + d2) || '<div class="item" style="color:var(--muted)">None recorded</div>';
+
+  // Blockers
+  const bl = document.getElementById('blockers-list');
+  const b1 = (r1.blockers || []).map(b =>
+    `<div class="item"><span class="item-dot" style="background:#ff4757"></span><span style="color:#00e5a0">[M1]</span> ${b}</div>`
+  ).join('');
+  const b2 = (r2.blockers || []).map(b =>
+    `<div class="item"><span class="item-dot" style="background:#ff4757"></span><span style="color:#4d94ff">[M2]</span> ${b}</div>`
+  ).join('');
+  bl.innerHTML = (b1 + b2) || '<div class="item" style="color:var(--muted)">No blockers 🎉</div>';
+
+  // Action items — dono
+  const al = document.getElementById('actions-list');
+  const a1 = (r1.action_items || []).map(a =>
+    `<div class="action-item" style="border-left:3px solid #00e5a0">
+      <div class="action-task"><span style="color:#00e5a0">[M1]</span> ${a.task}</div>
+      <div class="action-meta">
+        <span class="action-owner">👤 ${a.owner}</span>
+        <span class="action-due">🗓 ${a.due}</span>
+      </div>
+    </div>`
+  ).join('');
+  const a2 = (r2.action_items || []).map(a =>
+    `<div class="action-item" style="border-left:3px solid #4d94ff">
+      <div class="action-task"><span style="color:#4d94ff">[M2]</span> ${a.task}</div>
+      <div class="action-meta">
+        <span class="action-owner">👤 ${a.owner}</span>
+        <span class="action-due">🗓 ${a.due}</span>
+      </div>
+    </div>`
+  ).join('');
+  al.innerHTML = (a1 + a2) || '<div style="color:var(--muted)">No action items</div>';
+}
+
+  </script>
+</body>
+
+</html>
