@@ -258,7 +258,6 @@ All system architecture, prompt engineering, RAG pipeline design, UI design, and
 | Name | Role |
 |---|---|
 | Saloni Sharma | Full-stack Developer |
-| Riddhi Sharma | AI Engineer |
 | Harshit Sharma | AI Engineer |
 | Bhumika Sharma | Backend Developer |
 
